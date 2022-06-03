@@ -1,6 +1,7 @@
-from personal_data import api_id,  my_email, my_password
-import smtplib
+from personal_data import api_id, \
+    twilio_account_sid, twilio_auth_token, my_number, twilio_number
 import requests
+from twilio.rest import Client
 
 parameters = {
     "lat": 37.034409,
@@ -28,11 +29,12 @@ for hour_dict in list_of_dictionaries:
     if int(condition_code) < 700:
         will_rain = True
 
-# if there is going to be rain in the next 12 hours, send an alert email
+# if there is going to be rain in the next 12 hours, send an SMS alert using Twilio
 if will_rain:
-    with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
-        connection.starttls()
-        connection.login(user=my_email, password=my_password)
-        connection.sendmail(from_addr=my_email,
-                            to_addrs=my_email,
-                            msg="Subject: Weather alert!\n\nIt's going to rain today. Bring an umbrella!")
+    client = Client(twilio_account_sid, twilio_auth_token)
+    message = client.messages.create(
+                                  body="Weather alert! It's going to rain today. Bring an umbrella!",
+                                  from_=twilio_number,
+                                  to=my_number
+                                )
+    print(message.status)
